@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ELIAH TECH BOT</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Poppins', 'Montserrat', sans-serif;
+      background: linear-gradient(120deg, #181c2b 0%, #232946 100%);
+      overflow-x: hidden;
+      position: relative;
+    }
+    .blur-bg {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 20% 30%, #00fff055 0%, transparent 60%),
+                  radial-gradient(circle at 80% 70%, #ff00ea55 0%, transparent 60%),
+                  linear-gradient(120deg, #00fff022 0%, #ff00ea22 100%);
+      filter: blur(60px) saturate(1.2);
+      opacity: 0.8;
+      animation: bg-move 12s ease-in-out infinite alternate, shimmer 6s linear infinite;
+    }
+    @keyframes bg-move {
+      0% { background-position: 20% 30%, 80% 70%; }
+      100% { background-position: 30% 40%, 70% 60%; }
+    }
+    @keyframes shimmer {
+      0% { opacity: 0.8; }
+      50% { opacity: 1; }
+      100% { opacity: 0.8; }
+    }
+    .glass {
+      background: rgba(30, 34, 54, 0.85);
+      border-radius: 32px;
+      box-shadow: 0 8px 64px 0 #00fff022, 0 0 0 2px #ff00ea22;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 2px solid #232946;
+      padding: 2.5rem 2rem 2rem 2rem;
+      margin: 3.5rem auto 2rem auto;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+      overflow: visible;
+      animation: glass-float 4s ease-in-out infinite alternate, glass-glow 3s linear infinite;
+      /* Glowing animated border */
+      box-shadow: 0 0 0 4px #00fff055, 0 0 32px 8px #ff00ea33, 0 8px 64px 0 #00fff022;
+      border-image: linear-gradient(120deg, #00fff0, #ff00ea, #00fff0) 1;
+    }
+    @keyframes glass-float {
+      0% { transform: translateY(0px) scale(1); }
+      100% { transform: translateY(-10px) scale(1.01); }
+    }
+    @keyframes glass-glow {
+      0% { box-shadow: 0 0 0 4px #00fff055, 0 0 32px 8px #ff00ea33, 0 8px 64px 0 #00fff022; }
+      50% { box-shadow: 0 0 0 8px #ff00ea55, 0 0 64px 16px #00fff033, 0 8px 64px 0 #00fff022; }
+      100% { box-shadow: 0 0 0 4px #00fff055, 0 0 32px 8px #ff00ea33, 0 8px 64px 0 #00fff022; }
+    }
+    .profile-pic {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin: 0 auto 1.2rem;
+      border: 3px solid #00fff0;
+      box-shadow: 0 0 30px #00fff0, 0 0 60px #ff00ea33;
+      animation: neon-glow 2s infinite alternate, pulse 2.5s infinite cubic-bezier(.4,0,.6,1);
+      overflow: hidden;
+      position: relative;
+      z-index: 2;
+    }
+    @keyframes neon-glow {
+      0% { box-shadow: 0 0 30px #00fff0, 0 0 60px #ff00ea33; }
+      100% { box-shadow: 0 0 60px #ff00ea, 0 0 90px #00fff055; }
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 30px #00fff0, 0 0 60px #ff00ea33; }
+      50% { transform: scale(1.07); box-shadow: 0 0 60px #ff00ea, 0 0 90px #00fff055; }
+      100% { transform: scale(1); box-shadow: 0 0 30px #00fff0, 0 0 60px #ff00ea33; }
+    }
+    .profile-pic img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      filter: brightness(1.1) contrast(1.2) saturate(1.2);
+    }
+    .title {
+      color: #fff;
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-shadow: 0 0 10px #00fff0, 0 0 20px #ff00ea;
+      margin-bottom: 2.2rem;
+      font-family: 'Montserrat', 'Poppins', sans-serif;
+    }
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      justify-items: center;
+      align-items: center;
+      margin: 0 auto 1.2rem auto;
+      width: 100%;
+      max-width: 320px;
+      animation: float-grid 5s ease-in-out infinite alternate;
+    }
+    @keyframes float-grid {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-10px); }
+    }
+    .icon-btn {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #232946 60%, #00fff0 100%);
+      border: 2px solid #ff00ea;
+      box-shadow: 0 0 24px #00fff055, 0 0 0 #ff00ea00;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 2.1rem;
+      cursor: pointer;
+      transition: all 0.18s cubic-bezier(.4,2,.6,1);
+      position: relative;
+      outline: none;
+      z-index: 1;
+      filter: drop-shadow(0 0 12px #00fff0);
+    }
+    .icon-btn:hover, .icon-btn:focus {
+      background: linear-gradient(135deg, #ff00ea 60%, #00fff0 100%);
+      color: #ff00ea;
+      box-shadow: 0 0 40px #ff00ea99, 0 0 80px #00fff099;
+      border-color: #fff;
+      transform: scale(1.15) rotateZ(8deg);
+      filter: brightness(1.2) saturate(1.3) drop-shadow(0 0 18px #ff00ea);
+    }
+    .icon-btn:active {
+      transform: scale(0.97) rotateZ(-8deg);
+      filter: brightness(0.95);
+    }
+    .icon-btn i {
+      pointer-events: none;
+      filter: drop-shadow(0 0 8px #00fff0);
+    }
+    .tooltip {
+      visibility: hidden;
+      opacity: 0;
+      background: #232946ee;
+      color: #fff;
+      text-align: center;
+      border-radius: 8px;
+      padding: 0.3rem 0.7rem;
+      position: absolute;
+      z-index: 10;
+      bottom: 110%;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      font-size: 0.95rem;
+      font-family: 'Montserrat', 'Poppins', sans-serif;
+      box-shadow: 0 2px 12px #00fff055;
+      border: 1.5px solid #00fff0;
+      transition: opacity 0.3s, visibility 0.3s, transform 0.3s;
+      white-space: nowrap;
+      animation: none;
+    }
+    .icon-btn:hover .tooltip, .icon-btn:focus .tooltip {
+      visibility: visible;
+      opacity: 1;
+      transform: translateX(-50%) translateY(-8px);
+      animation: tooltip-fadein 0.4s;
+      border-color: #ff00ea;
+      box-shadow: 0 0 12px #ff00ea99, 0 0 24px #00fff099;
+    }
+    @keyframes tooltip-fadein {
+      0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+      100% { opacity: 1; transform: translateX(-50%) translateY(-8px); }
+    }
+    @media (max-width: 600px) {
+      .glass { max-width: 99vw; padding: 0.7rem 0.1rem; }
+      .profile-pic { width: 70px; height: 70px; margin-bottom: 0.7rem; }
+      .title { font-size: 1rem; margin-bottom: 1.2rem; }
+      .icon-grid { gap: 0.7rem; max-width: 180px; }
+      .icon-btn { width: 38px; height: 38px; font-size: 1.3rem; }
+      .tooltip { font-size: 0.7rem; padding: 0.2rem 0.4rem; }
+    }
+    /* Animated background particles */
+    .particles {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      top: 0; left: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .particle {
+      position: absolute;
+      width: 8px; height: 8px;
+      background: linear-gradient(135deg, #00fff0, #ff00ea);
+      border-radius: 50%;
+      opacity: 0.7;
+      animation: float 8s linear infinite;
+      filter: blur(1px);
+    }
+    @keyframes float {
+      0% { transform: translateY(100vh) scale(1); opacity: 0.7; }
+      100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+    }
+    /* Hologram floating lines */
+    .holo-line {
+      position: absolute;
+      left: 50%;
+      width: 320px;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #00fff0 40%, #ff00ea 60%, transparent);
+      opacity: 0.18;
+      filter: blur(2px);
+      z-index: 1;
+      pointer-events: none;
+      animation: holo-line-float 4s infinite alternate;
+    }
+    .holo-line.top { top: 0; transform: translateX(-50%) translateY(-40px); }
+    .holo-line.bottom { bottom: 0; transform: translateX(-50%) translateY(40px); }
+    @keyframes holo-line-float {
+      0% { opacity: 0.18; }
+      100% { opacity: 0.32; }
+    }
+    .quote-box {
+      margin: 1.2rem auto 1.2rem auto;
+      padding: 1.1rem 1.2rem;
+      border-radius: 18px;
+      background: rgba(0,255,240,0.07);
+      box-shadow: 0 0 18px #00fff055, 0 0 0 #ff00ea00;
+      color: #fff;
+      font-size: 1.1rem;
+      font-family: 'Montserrat', 'Poppins', sans-serif;
+      text-align: center;
+      max-width: 340px;
+      border: 1.5px solid #00fff0;
+      text-shadow: 0 0 8px #00fff0, 0 0 16px #ff00ea55;
+      min-height: 60px;
+      transition: background 0.5s;
+      position: relative;
+      z-index: 2;
+      animation: quote-fadein 0.7s;
+    }
+    @keyframes quote-fadein {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .credit {
+      margin-top: 2.2rem;
+      font-size: 0.98rem;
+      color: #00fff0;
+      text-align: center;
+      font-family: 'Montserrat', 'Poppins', sans-serif;
+      opacity: 0.8;
+      letter-spacing: 1.2px;
+      text-shadow: 0 0 8px #00fff0, 0 0 16px #ff00ea55;
+      user-select: none;
+    }
+    @media (max-width: 600px) {
+      .quote-box { font-size: 0.8rem; padding: 0.6rem 0.5rem; max-width: 98vw; }
+      .credit { font-size: 0.7rem; margin-top: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <audio id="background-music" loop volume="0.5" muted>
+    <source src="https://www.fesliyanstudios.com/musicfiles/2021-04-20_Training_Hip_Hop_Rap_Beat_by_David_Renda.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <div class="background-animation"></div>
+  <div class="container">
+    <div class="blur-bg"></div>
+    <div class="particles"></div>
+    <div class="glass">
+      <div class="profile-pic">
+        <img src="https://github.com/Eliahhango.png" alt="Eliah">
+      </div>
+      <div class="quote-box" id="quoteBox">"Innovation distinguishes between a leader and a follower." – Steve Jobs</div>
+      <div class="title">WhatsApp Session Generator</div>
+      <div class="icon-grid">
+        <button onclick="window.open('/eliahqr')" class="icon-btn" tabindex="0"><i class="fas fa-qrcode"></i><span class="tooltip">QR Code</span></button>
+        <button onclick="window.open('/pair')" class="icon-btn" tabindex="0"><i class="fas fa-link"></i><span class="tooltip">Pair Code</span></button>
+        <button onclick="window.open('https://github.com/Eliahhango/EliTechWiz-V4')" class="icon-btn" tabindex="0"><i class="fab fa-github"></i><span class="tooltip">Bot Repo</span></button>
+        <button onclick="window.open('https://github.com/Eliahhango/EliTechWiz-V4-PLUGINS')" class="icon-btn" tabindex="0"><i class="fas fa-puzzle-piece"></i><span class="tooltip">Plugins</span></button>
+        <button onclick="window.open('https://wa.me/255688164510')" class="icon-btn" tabindex="0"><i class="fab fa-whatsapp"></i><span class="tooltip">Contact Me</span></button>
+        <button onclick="window.open('https://chat.whatsapp.com/CK55DhCbb2q6UihlzPBTkP')" class="icon-btn" tabindex="0"><i class="fas fa-users"></i><span class="tooltip">WA Group</span></button>
+        <button onclick="window.open('https://whatsapp.com/channel/0029VaeEYF0BvvsZpaTPfL2s')" class="icon-btn" tabindex="0"><i class="fas fa-broadcast-tower"></i><span class="tooltip">WA Channel</span></button>
+        <button onclick="window.open('https://instagram.com/elitechwiz')" class="icon-btn" tabindex="0"><i class="fab fa-instagram"></i><span class="tooltip">Instagram</span></button>
+        <button onclick="window.open('https://youtube.com/@eliahhango')" class="icon-btn" tabindex="0"><i class="fab fa-youtube"></i><span class="tooltip">Youtube</span></button>
+      </div>
+      <div class="credit">Powered by EliTechWiz &mdash; Eliah Hango</div>
+    </div>
+  </div>
+  <script>
+    // Animated particles
+    function createParticles() {
+      const particles = document.querySelector('.particles');
+      for(let i = 0; i < 60; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animationDelay = (Math.random() * 8) + 's';
+        particles.appendChild(particle);
+      }
+    }
+    createParticles();
+    // Quotes array and rotator
+    const quotes = [
+      '"Innovation distinguishes between a leader and a follower." – Steve Jobs',
+      '"The best way to predict the future is to invent it." – Alan Kay',
+      '"Technology is best when it brings people together." – Matt Mullenweg',
+      '"The science of today is the technology of tomorrow." – Edward Teller',
+      '"If you can dream it, you can do it." – Walt Disney',
+      '"Great things never come from comfort zones."',
+      '"Don't let yesterday take up too much of today." – Will Rogers',
+      '"The only way to do great work is to love what you do." – Steve Jobs',
+      '"Creativity is thinking up new things. Innovation is doing new things." – Theodore Levitt',
+      '"It always seems impossible until it's done." – Nelson Mandela',
+      '"The future belongs to those who believe in the beauty of their dreams." – Eleanor Roosevelt',
+      '"Success is not the key to happiness. Happiness is the key to success." – Albert Schweitzer',
+      '"Dream big. Start small. Act now." – Robin Sharma',
+      '"Opportunities don't happen. You create them." – Chris Grosser',
+      '"Your limitation—it's only your imagination."',
+      '"Push yourself, because no one else is going to do it for you."',
+      '"Sometimes later becomes never. Do it now."',
+      '"Don't watch the clock; do what it does. Keep going." – Sam Levenson',
+      '"The only limit to our realization of tomorrow will be our doubts of today." – F.D. Roosevelt',
+      '"The future starts today, not tomorrow." – Pope John Paul II',
+      '"Imagination is more important than knowledge. Knowledge is limited. Imagination encircles the world." – Albert Einstein',
+      '"The real problem is not whether machines think but whether men do." – B.F. Skinner',
+      '"It's not about ideas. It's about making ideas happen." – Scott Belsky',
+      '"Simplicity is the ultimate sophistication." – Leonardo da Vinci',
+      '"The only thing worse than starting something and failing is not starting something." – Seth Godin',
+      '"The people who are crazy enough to think they can change the world are the ones who do." – Apple Inc.',
+      '"Every once in a while, a new technology, an old problem, and a big idea turn into an innovation." – Dean Kamen',
+      '"Do not wait to strike till the iron is hot; but make it hot by striking." – William Butler Yeats',
+      '"You can't use up creativity. The more you use, the more you have." – Maya Angelou',
+      '"The advance of technology is based on making it fit in so that you don't really even notice it." – Bill Gates',
+      '"The future depends on what you do today." – Mahatma Gandhi',
+      '"Don't be afraid to give up the good to go for the great." – John D. Rockefeller',
+      '"Success is not in what you have, but who you are." – Bo Bennett',
+      '"The only way to discover the limits of the possible is to go beyond them into the impossible." – Arthur C. Clarke',
+      '"The great growling engine of change – technology." – Alvin Toffler',
+      '"If opportunity doesn't knock, build a door." – Milton Berle',
+      '"The best way to get started is to quit talking and begin doing." – Walt Disney',
+      '"Don't be pushed around by the fears in your mind. Be led by the dreams in your heart." – Roy T. Bennett',
+      '"The secret of getting ahead is getting started." – Mark Twain',
+      '"Act as if what you do makes a difference. It does." – William James'
+    ];
+    let quoteIndex = 0;
+    function showNextQuote() {
+      quoteIndex = (quoteIndex + 1) % quotes.length;
+      const quoteBox = document.getElementById('quoteBox');
+      quoteBox.style.opacity = 0;
+      setTimeout(() => {
+        quoteBox.innerHTML = quotes[quoteIndex];
+        quoteBox.style.opacity = 1;
+      }, 400);
+    }
+    setInterval(showNextQuote, 5000);
+
+    document.addEventListener('DOMContentLoaded', (event) => {
+      const audio = document.getElementById('background-music');
+      audio.play().catch(error => {
+        console.log('Autoplay was prevented:', error);
+        // Show a play button or instructions if autoplay is blocked
+      });
+
+      document.body.addEventListener('click', () => {
+        if (audio.muted) {
+          audio.muted = false;
+        }
+      }, { once: true });
+    });
+  </script>
+</body>
+</html>

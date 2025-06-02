@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eliah Tech Pairing</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #232526, #0f2027 80%);
+      overflow-x: hidden;
+      position: relative;
+    }
+    .glass {
+      background: rgba(0, 0, 0, 0.8);
+      border-radius: 30px;
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.18);
+      padding: 2.5rem 2rem;
+      margin: 2rem auto;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+    .profile-pic {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin: 0 auto 1.2rem;
+      border: 4px solid #c01736;
+      box-shadow: 0 0 40px #c01736, 0 0 80px #c0173633;
+      animation: neon-glow 2s infinite alternate;
+      overflow: hidden;
+    }
+    @keyframes neon-glow {
+      0% { box-shadow: 0 0 40px #c01736, 0 0 80px #c0173633; }
+      100% { box-shadow: 0 0 80px #c01736, 0 0 120px #c0173655; }
+    }
+    .profile-pic img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    .title {
+      color: #c01736;
+      font-size: 2rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-shadow: 0 0 20px #c01736, 0 0 40px #c0173655;
+      margin-bottom: 1.2rem;
+    }
+    .input-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .input-container input {
+      padding: 15px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    .input-container input:focus {
+      outline: none;
+      background: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 15px #c01736;
+    }
+    .input-container input::placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .input-container button {
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      background: linear-gradient(45deg, #5935ac, #c01736);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 1.1rem;
+      box-shadow: 0 0 10px #c01736;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    .input-container button:before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, #c0173644, transparent);
+      transition: left 0.5s;
+      z-index: 0;
+    }
+    .input-container button:hover:before {
+      left: 100%;
+    }
+    .input-container button:hover {
+      background: #c0173622;
+      color: #c01736;
+      box-shadow: 0 0 30px #c01736;
+    }
+    .centered-text {
+      color: #fff;
+      text-align: center;
+      margin: 15px 0;
+      text-shadow: 0 0 10px #5935ac;
+    }
+    .particles {
+      position: fixed;
+      width: 100vw;
+      height: 100vh;
+      top: 0; left: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .particle {
+      position: absolute;
+      width: 6px; height: 6px;
+      background: #c01736;
+      border-radius: 50%;
+      opacity: 0.7;
+      animation: float 8s linear infinite;
+    }
+    @keyframes float {
+      0% { transform: translateY(100vh) scale(1); opacity: 0.7; }
+      100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+    }
+    @media (max-width: 768px) {
+      .glass { max-width: 95vw; padding: 1.5rem; margin: 1.5rem auto; }
+      .profile-pic {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 1rem;
+      }
+      .title {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+      }
+      .input-container {
+        gap: 10px;
+        margin-top: 15px;
+      }
+      .input-container input,
+      .input-container button {
+        padding: 12px;
+        font-size: 1rem;
+      }
+      .centered-text {
+        font-size: 0.9rem;
+        margin: 10px 0;
+      }
+      .particle {
+        width: 4px; height: 4px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .glass { padding: 1rem; margin: 1rem auto; }
+      .profile-pic { width: 80px; height: 80px; margin-bottom: 0.8rem; }
+      .title { font-size: 1.2rem; margin-bottom: 0.8rem; }
+      .input-container {
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .input-container input,
+      .input-container button {
+        padding: 10px;
+        font-size: 0.9rem;
+      }
+      .centered-text {
+        font-size: 0.8rem;
+        margin: 8px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="particles"></div>
+  <div class="glass">
+    <div class="profile-pic">
+      <img src="https://github.com/Eliahhango.png" alt="Eliah">
+    </div>
+    <div class="title">ELIAH TECH PAIRING CODE</div>
+    <h6 class="centered-text">Made By ELIAH HANGO</h6>
+    <h6 class="centered-text">Enter Your Number with Country Code</h6>
+    <div class="input-container">
+      <input type="number" id="number" placeholder="25561783xxx">
+      <button id="submit">Generate Code</button>
+    </div>
+    <div id="waiting-message" style="display: none;">Please wait a while...</div>
+    <main id="pair"></main>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-alpha.1/axios.min.js"></script>
+  <script>
+    // Animated particles
+    function createParticles() {
+      const particles = document.querySelector('.particles');
+      for(let i = 0; i < 30; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.top = Math.random() * 100 + '%';
+        particle.style.animationDelay = (Math.random() * 8) + 's';
+        particles.appendChild(particle);
+      }
+    }
+    createParticles();
+    let a = document.getElementById("pair");
+    let b = document.getElementById("submit");
+    let c = document.getElementById("number");
+    async function Copy() {
+      let text = document.getElementById("copy").innerText;
+      let obj = document.getElementById("copy");
+      await navigator.clipboard.writeText(obj.innerText.replace('CODE: ', ''));
+      obj.innerText = "COPIED";
+      obj.style = "color:#c01736;font-weight:bold";
+      setTimeout(() => {
+        obj.innerText = text;
+        obj.style = "color:white;font-weight:bold";
+      }, 500);
+    }
+    b.addEventListener("click", async (e) => {
+      e.preventDefault();
+      if (!c.value) {
+        a.innerHTML = '<div class="centered-text" style="color:#c01736">Enter your WhatsApp number with Country Code</div>';
+      } else if (c.value.replace(/[^0-9]/g, "").length < 11) {
+        a.innerHTML = '<div class="centered-text" style="color:#c01736">Invalid Number</div>';
+      } else {
+        const Eliah_Tech = c.value.replace(/[^0-9]/g, "");
+        let bb = "";
+        let bbc = "";
+        const cc = Eliah_Tech.split('');
+        cc.map(a => {
+          bbc += a;
+          if (bbc.length == 3) bb += " " + a;
+          else if (bbc.length == 8) bb += " " + a;
+          else bb += a;
+        });
+        c.type = "text";
+        c.value = "+" + bb;
+        c.style = "color:#c01736;font-size:20px";
+        a.innerHTML = '<div class="centered-text">Please Wait...</div>';
+        let { data } = await axios(`/code?number=${Eliah_Tech}`);
+        let code = data.code || "Service Unavailable";
+        a.innerHTML = '<div id="copy" onclick="Copy()" style="color:#c01736;font-weight:bold;font-size:24px;cursor:pointer">CODE: <span style="color:white">' + code + '</span></div>';
+      }
+    });
+  </script>
+</body>
+</html>
