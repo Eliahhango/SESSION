@@ -18,12 +18,12 @@
 
 <div align="center">
   
-[![Stars](https://img.shields.io/github/stars/Eliahhango/SESSION-GENERATOR-BY-ELIAH?style=for-the-badge&color=yellow)](https://github.com/Eliahhango/SESSION-GENERATOR-BY-ELIAH/stargazers)
-[![Forks](https://img.shields.io/github/forks/Eliahhango/SESSION-GENERATOR-BY-ELIAH?style=for-the-badge&color=green)](https://github.com/Eliahhango/SESSION-GENERATOR-BY-ELIAH/fork)
-[![Issues](https://img.shields.io/github/issues/Eliahhango/SESSION-GENERATOR-BY-ELIAH?style=for-the-badge&color=red)](https://github.com/Eliahhango/SESSION-GENERATOR-BY-ELIAH/issues)
-[![License](https://img.shields.io/github/license/Eliahhango/SESSION-GENERATOR-BY-ELIAH?style=for-the-badge&color=blue)](https://github.com/Eliahhango/SESSION-GENERATOR-BY-ELIAH/blob/main/LICENSE)
-[![Last Commit](https://img.shields.io/github/last-commit/Eliahhango/SESSION-GENERATOR-BY-ELIAH?style=for-the-badge&color=orange)](https://github.com/Eliahhango/SESSION-GENERATOR-BY-ELIAH/commits/main)
-[![Deploy to Heroku](https://img.shields.io/badge/Deploy%20To%20Heroku-purple?style=for-the-badge&logo=heroku)](https://dashboard.heroku.com/new?template=https://github.com/Eliahhango/SESSION-GENERATOR-BY-ELIAH)
+[![Stars](https://img.shields.io/github/stars/Eliahhango/SESSION?style=for-the-badge&color=yellow)](https://github.com/Eliahhango/SESSION/stargazers)
+[![Forks](https://img.shields.io/github/forks/Eliahhango/SESSION?style=for-the-badge&color=green)](https://github.com/Eliahhango/SESSION/fork)
+[![Issues](https://img.shields.io/github/issues/Eliahhango/SESSION?style=for-the-badge&color=red)](https://github.com/Eliahhango/SESSION/issues)
+[![License](https://img.shields.io/github/license/Eliahhango/SESSION?style=for-the-badge&color=blue)](https://github.com/Eliahhango/SESSION/blob/main/LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/Eliahhango/SESSION?style=for-the-badge&color=orange)](https://github.com/Eliahhango/SESSION/commits/main)
+[![Deploy to Heroku](https://img.shields.io/badge/Deploy%20To%20Heroku-purple?style=for-the-badge&logo=heroku)](https://dashboard.heroku.com/new?template=https://github.com/Eliahhango/SESSION)
 
 </div>
 
@@ -95,8 +95,8 @@
 <br>
 
 ```bash
-git clone https://github.com/Eliahhango/SESSION-GENERATOR-BY-ELIAH.git
-cd SESSION-GENERATOR-BY-ELIAH
+git clone https://github.com/Eliahhango/SESSION.git
+cd SESSION
 npm install
 npm start
 ```
