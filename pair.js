@@ -34,7 +34,7 @@ router.get('/', async (req, res) => {
                 },
                 printQRInTerminal: false,
                 logger: pino({level: "fatal"}).child({level: "fatal"}),
-                browser: ["Chrome (Linux)", "", ""]
+                browser: Browsers.macOS("Desktop")
             });
             if(!Pair_Code_By_Elitechwiz_Tech.authState.creds.registered && !responded) {
                 await delay(1500);
