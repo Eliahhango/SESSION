@@ -1,20 +1,14 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "eliah.js",
-      "use": "@vercel/node"
-    }
-  ],
   "functions": {
-    "eliah.js": {
+    "api/index.js": {
       "maxDuration": 60
     }
   },
-  "routes": [
+  "rewrites": [
     {
-      "src": "/(.*)",
-      "dest": "eliah.js"
+      "source": "/(.*)",
+      "destination": "/api/index.js"
     }
   ]
 }
