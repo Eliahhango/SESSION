@@ -254,7 +254,7 @@ router.get('/', async (req, res) => {
 			`);
 			responded = true;
 		}
-	}, 25000);
+	}, 8000);
 
 	function markResponded() {
 		responded = true;

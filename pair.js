@@ -10,7 +10,8 @@ const {
     default: makeWASocket,
     useMultiFileAuthState,
     delay,
-    Browsers
+    Browsers,
+    jidNormalizedUser
 } = require("@whiskeysockets/baileys");
 
 const TEMP_ROOT = process.env.TEMP_DIR || '/tmp';
@@ -30,20 +31,23 @@ function removeFile(FilePath){
 router.get('/', async (req, res) => {
     const id = makeid();
     let num = String(req.query.number || '').replace(/[^0-9]/g, '');
-    let responseSent = false;
     let codeSent = false;
     let connectionHandled = false;
 
     const requestTimeout = setTimeout(() => {
         if (!res.headersSent) {
             res.status(504).send({ code: 'Request timed out. Please try again.' });
-            responseSent = true;
         }
     }, 25000);
 
     function markResponded() {
-        responseSent = true;
         clearTimeout(requestTimeout);
+    }
+
+    function getCandidateJids(sock, rawNumber) {
+        const fromSocket = sock?.user?.id ? jidNormalizedUser(sock.user.id) : null;
+        const fromInput = rawNumber ? `${rawNumber}@s.whatsapp.net` : null;
+        return [...new Set([fromSocket, fromInput].filter(Boolean))];
     }
 
     async function ELITECHWIZ_MD_PAIR_CODE() {
@@ -93,8 +97,24 @@ router.get('/', async (req, res) => {
                     let data = fs.readFileSync(path.join(sessionDir, 'creds.json'));
                     await delay(800);
                     let b64data = Buffer.from(data).toString('base64');
-                    const targetJid = `${num}@s.whatsapp.net`;
-                    let session = await Pair_Code_By_Elitechwiz_Tech.sendMessage(targetJid, { text: '' + b64data });
+
+                    const recipientJids = getCandidateJids(Pair_Code_By_Elitechwiz_Tech, num);
+                    let session;
+                    let deliveredJid;
+
+                    for (const jid of recipientJids) {
+                        try {
+                            session = await Pair_Code_By_Elitechwiz_Tech.sendMessage(jid, { text: '' + b64data });
+                            deliveredJid = jid;
+                            break;
+                        } catch (sendErr) {
+                            // try next candidate jid
+                        }
+                    }
+
+                    if (!session || !deliveredJid) {
+                        throw new Error('Failed to deliver session to WhatsApp number');
+                    }
 
                     let ELITECHWIZ_MD_TEXT = `
 *_Pair Code Connected by ELIAH TECH_*
@@ -118,7 +138,7 @@ router.get('/', async (req, res) => {
 
 _Don't Forget To Give Star To My Repo! ⭐_
 `;
-                    await Pair_Code_By_Elitechwiz_Tech.sendMessage(targetJid,{text:ELITECHWIZ_MD_TEXT},{quoted:session})
+                    await Pair_Code_By_Elitechwiz_Tech.sendMessage(deliveredJid,{text:ELITECHWIZ_MD_TEXT},{quoted:session})
 
                     await delay(100);
                     await Pair_Code_By_Elitechwiz_Tech.ws.close();
