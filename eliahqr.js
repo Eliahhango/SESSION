@@ -16,6 +16,16 @@ const {
 	makeInMemoryStore,
 } = require("@whiskeysockets/baileys");
 
+const TEMP_ROOT = process.env.TEMP_DIR || '/tmp';
+
+function getSessionDir(id) {
+	return path.join(TEMP_ROOT, 'session-temp', id);
+}
+
+function ensureDir(dirPath) {
+	fs.mkdirSync(dirPath, { recursive: true });
+}
+
 function removeFile(FilePath) {
 	if (!fs.existsSync(FilePath)) return false;
 	fs.rmSync(FilePath, {
@@ -230,10 +240,12 @@ router.get('/', async (req, res) => {
 	const id = makeid();
 	let responded = false; // Flag to prevent multiple triggers
 	async function Elitechwiz_Md_QR_CODE() {
+		const sessionDir = getSessionDir(id);
+		ensureDir(sessionDir);
 		const {
 			state,
 			saveCreds
-		} = await useMultiFileAuthState('./temp/' + id)
+		} = await useMultiFileAuthState(sessionDir)
 		try {
 			let Qr_Code_By_Eliah_Tech = Eliah_Tech({
 				auth: state,
@@ -261,7 +273,7 @@ router.get('/', async (req, res) => {
 
 				if (connection == "open" && !responded) {
 					await delay(5000);
-					let data = fs.readFileSync(__dirname + `/temp/${id}/creds.json`);
+					let data = fs.readFileSync(path.join(sessionDir, 'creds.json'));
 					await delay(800);
 					let b64data = Buffer.from(data).toString('base64');
 					let session = await Qr_Code_By_Eliah_Tech.sendMessage(Qr_Code_By_Eliah_Tech.user.id, { text: '' + b64data });
@@ -293,7 +305,7 @@ _Don't Forget To Give Star To My Repo! ⭐_
 					await delay(100);
 					await Qr_Code_By_Eliah_Tech.ws.close();
 					responded = true;
-					return await removeFile("temp/" + id);
+					return await removeFile(sessionDir);
 				} else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode != 401 && !responded) {
 					await delay(10000);
 					Elitechwiz_Md_QR_CODE();
@@ -306,7 +318,7 @@ _Don't Forget To Give Star To My Repo! ⭐_
 				});
 			}
 			console.log(err);
-			await removeFile("temp/" + id);
+			await removeFile(sessionDir);
 		}
 	}
 	return await Elitechwiz_Md_QR_CODE()

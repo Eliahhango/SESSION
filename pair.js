@@ -3,15 +3,25 @@ pastebin = new PastebinAPI('EMWTMkQAVfJa9kM-MRUrxd5Oku1U7pgL')
 const {makeid} = require('./id');
 const express = require('express');
 const fs = require('fs');
+const path = require('path');
 let router = express.Router()
 const pino = require("pino");
 const {
-    default: Elitechwiz_Tech,
+    default: makeWASocket,
     useMultiFileAuthState,
     delay,
-    makeCacheableSignalKeyStore,
     Browsers
-} = require("maher-zubair-baileys");
+} = require("@whiskeysockets/baileys");
+
+const TEMP_ROOT = process.env.TEMP_DIR || '/tmp';
+
+function getSessionDir(id) {
+    return path.join(TEMP_ROOT, 'session-temp', id);
+}
+
+function ensureDir(dirPath) {
+    fs.mkdirSync(dirPath, { recursive: true });
+}
 
 function removeFile(FilePath){
     if(!fs.existsSync(FilePath)) return false;
@@ -19,41 +29,52 @@ function removeFile(FilePath){
  };
 router.get('/', async (req, res) => {
     const id = makeid();
-    let num = req.query.number;
+    let num = String(req.query.number || '');
     let responded = false; // Flag to prevent multiple triggers
     async function ELITECHWIZ_MD_PAIR_CODE() {
+        const sessionDir = getSessionDir(id);
+        ensureDir(sessionDir);
         const {
             state,
             saveCreds
-        } = await useMultiFileAuthState('./temp/'+id)
+        } = await useMultiFileAuthState(sessionDir)
         try {
-            let Pair_Code_By_Elitechwiz_Tech = Elitechwiz_Tech({
-                auth: {
-                    creds: state.creds,
-                    keys: makeCacheableSignalKeyStore(state.keys, pino({level: "fatal"}).child({level: "fatal"})),
-                },
+            let Pair_Code_By_Elitechwiz_Tech = makeWASocket({
+                auth: state,
                 printQRInTerminal: false,
                 logger: pino({level: "fatal"}).child({level: "fatal"}),
                 browser: Browsers.macOS("Desktop")
             });
-            if(!Pair_Code_By_Elitechwiz_Tech.authState.creds.registered && !responded) {
-                await delay(1500);
-                num = num.replace(/[^0-9]/g,'');
-                const code = await Pair_Code_By_Elitechwiz_Tech.requestPairingCode(num)
-                if(!res.headersSent){
-                    await res.send({code});
-                    responded = true;
-                }
-            }
             Pair_Code_By_Elitechwiz_Tech.ev.on('creds.update', saveCreds)
             Pair_Code_By_Elitechwiz_Tech.ev.on("connection.update", async (s) => {
                 const {
                     connection,
-                    lastDisconnect
+                    lastDisconnect,
+                    qr
                 } = s;
+
+                if (!responded && !state.creds.registered && (connection === 'connecting' || !!qr)) {
+                    await delay(1200);
+                    num = num.replace(/[^0-9]/g, '');
+                    if (!num || num.length < 11) {
+                        if (!res.headersSent) {
+                            res.status(400).send({ code: 'Invalid number' });
+                        }
+                        responded = true;
+                        await Pair_Code_By_Elitechwiz_Tech.ws.close();
+                        return await removeFile(sessionDir);
+                    }
+
+                    const code = await Pair_Code_By_Elitechwiz_Tech.requestPairingCode(num)
+                    if(!res.headersSent){
+                        await res.send({code});
+                        responded = true;
+                    }
+                }
+
                 if (connection == "open" && !responded) {
                     await delay(5000);
-                    let data = fs.readFileSync(__dirname + `/temp/${id}/creds.json`);
+                    let data = fs.readFileSync(path.join(sessionDir, 'creds.json'));
                     await delay(800);
                     let b64data = Buffer.from(data).toString('base64');
                     let session = await Pair_Code_By_Elitechwiz_Tech.sendMessage(Pair_Code_By_Elitechwiz_Tech.user.id, { text: '' + b64data });
@@ -85,7 +106,7 @@ _Don't Forget To Give Star To My Repo! ⭐_
                     await delay(100);
                     await Pair_Code_By_Elitechwiz_Tech.ws.close();
                     responded = true;
-                    return await removeFile('./temp/'+id);
+                    return await removeFile(sessionDir);
                 } else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode != 401 && !responded) {
                     await delay(10000);
                     ELITECHWIZ_MD_PAIR_CODE();
@@ -93,7 +114,7 @@ _Don't Forget To Give Star To My Repo! ⭐_
             });
         } catch (err) {
             console.log("service restated");
-            await removeFile('./temp/'+id);
+            await removeFile(sessionDir);
             if(!res.headersSent){
                 await res.send({code:"Service Unavailable"});
             }
