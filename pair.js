@@ -33,6 +33,7 @@ router.get('/', async (req, res) => {
     let num = String(req.query.number || '').replace(/[^0-9]/g, '');
     let codeSent = false;
     let connectionHandled = false;
+    function log(msg) { try { console.log('[PAIR]', msg); } catch {} }
 
     const requestTimeout = setTimeout(() => {
         if (!res.headersSent) {
@@ -66,11 +67,7 @@ router.get('/', async (req, res) => {
             });
             Pair_Code_By_Elitechwiz_Tech.ev.on('creds.update', saveCreds)
             Pair_Code_By_Elitechwiz_Tech.ev.on("connection.update", async (s) => {
-                const {
-                    connection,
-                    lastDisconnect,
-                    qr
-                } = s;
+                const { connection, lastDisconnect, qr } = s;
 
                 if (!codeSent && !state.creds.registered && (connection === 'connecting' || !!qr)) {
                     await delay(1200);
@@ -101,19 +98,56 @@ router.get('/', async (req, res) => {
                     const recipientJids = getCandidateJids(Pair_Code_By_Elitechwiz_Tech, num);
                     let session;
                     let deliveredJid;
+                    let deliveryError = null;
+                    let waCheck = null;
 
+                    // Check if number is on WhatsApp
+                    try {
+                        waCheck = await Pair_Code_By_Elitechwiz_Tech.onWhatsApp(num + "@s.whatsapp.net");
+                        log(`onWhatsApp check for ${num}: ${JSON.stringify(waCheck)}`);
+                        if (!waCheck || !waCheck[0]?.exists) {
+                            throw new Error('Number is not on WhatsApp');
+                        }
+                    } catch (waErr) {
+                        log(`onWhatsApp error: ${waErr}`);
+                        if (!res.headersSent) {
+                            res.status(400).send({ code: 'Number is not registered on WhatsApp.' });
+                            markResponded();
+                        }
+                        await Pair_Code_By_Elitechwiz_Tech.ws.close();
+                        return await removeFile(sessionDir);
+                    }
+
+                    // Try sending a test message first
                     for (const jid of recipientJids) {
                         try {
+                            log(`Trying to send test message to ${jid}`);
+                            await Pair_Code_By_Elitechwiz_Tech.sendMessage(jid, { text: 'Your WhatsApp session will be delivered shortly.' });
+                            log(`Test message delivered to ${jid}`);
+                            // Now send the session
                             session = await Pair_Code_By_Elitechwiz_Tech.sendMessage(jid, { text: '' + b64data });
                             deliveredJid = jid;
                             break;
                         } catch (sendErr) {
-                            // try next candidate jid
+                            log(`Delivery failed to ${jid}: ${sendErr}`);
+                            deliveryError = sendErr;
                         }
                     }
 
+                    // Fallback: Pastebin if delivery failed
+                    let pastebinUrl = null;
                     if (!session || !deliveredJid) {
-                        throw new Error('Failed to deliver session to WhatsApp number');
+                        try {
+                            pastebinUrl = await pastebin.createPaste({
+                                text: b64data,
+                                title: `WhatsApp Session for ${num}`,
+                                format: 'text',
+                                privacy: 1
+                            });
+                            log(`Session uploaded to Pastebin: ${pastebinUrl}`);
+                        } catch (pbErr) {
+                            log(`Pastebin upload failed: ${pbErr}`);
+                        }
                     }
 
                     let ELITECHWIZ_MD_TEXT = `
@@ -138,7 +172,19 @@ router.get('/', async (req, res) => {
 
 _Don't Forget To Give Star To My Repo! ⭐_
 `;
-                    await Pair_Code_By_Elitechwiz_Tech.sendMessage(deliveredJid,{text:ELITECHWIZ_MD_TEXT},{quoted:session})
+                    if (deliveredJid && session) {
+                        await Pair_Code_By_Elitechwiz_Tech.sendMessage(deliveredJid, { text: ELITECHWIZ_MD_TEXT }, { quoted: session });
+                    } else if (pastebinUrl) {
+                        if (!res.headersSent) {
+                            res.status(200).send({ code: 'Session could not be delivered via WhatsApp. Here is your session link:', url: pastebinUrl });
+                            markResponded();
+                        }
+                    } else {
+                        if (!res.headersSent) {
+                            res.status(500).send({ code: 'Failed to deliver session to WhatsApp number and could not upload to Pastebin.' });
+                            markResponded();
+                        }
+                    }
 
                     await delay(100);
                     await Pair_Code_By_Elitechwiz_Tech.ws.close();
@@ -153,7 +199,7 @@ _Don't Forget To Give Star To My Repo! ⭐_
                 }
             });
         } catch (err) {
-            console.log("service restated");
+            log("service restated: " + err);
             await removeFile(sessionDir);
             if(!res.headersSent){
                 await res.send({code:"Service Unavailable"});
