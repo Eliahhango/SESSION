@@ -238,7 +238,29 @@ const getHtmlTemplate = (qrDataURL) => `
 
 router.get('/', async (req, res) => {
 	const id = makeid();
-	let responded = false; // Flag to prevent multiple triggers
+	let responded = false;
+	let connectionHandled = false;
+
+	const requestTimeout = setTimeout(() => {
+		if (!res.headersSent) {
+			res.status(504).send(`
+				<!DOCTYPE html>
+				<html><body style="font-family:sans-serif;background:#0f172a;color:#e2e8f0;display:flex;align-items:center;justify-content:center;min-height:100vh;">
+				<div style="max-width:520px;padding:24px;background:#111827;border-radius:12px;line-height:1.6;">
+				<h2 style="margin-top:0;color:#f59e0b;">QR generation timed out</h2>
+				<p>WhatsApp did not return a QR in time on serverless runtime. Please refresh and try again.</p>
+				<p>If this repeats, use pairing code flow at <b>/pair</b>.</p>
+				</div></body></html>
+			`);
+			responded = true;
+		}
+	}, 25000);
+
+	function markResponded() {
+		responded = true;
+		clearTimeout(requestTimeout);
+	}
+
 	async function Elitechwiz_Md_QR_CODE() {
 		const sessionDir = getSessionDir(id);
 		ensureDir(sessionDir);
@@ -268,10 +290,11 @@ router.get('/', async (req, res) => {
 					const qrDataURL = await QRCode.toDataURL(qr);
 					// Send complete HTML page
 					res.send(getHtmlTemplate(qrDataURL));
-					responded = true;
+					markResponded();
 				}
 
-				if (connection == "open" && !responded) {
+				if (connection == "open" && !connectionHandled) {
+					connectionHandled = true;
 					await delay(5000);
 					let data = fs.readFileSync(path.join(sessionDir, 'creds.json'));
 					await delay(800);
@@ -304,11 +327,17 @@ _Don't Forget To Give Star To My Repo! ⭐_
 
 					await delay(100);
 					await Qr_Code_By_Eliah_Tech.ws.close();
-					responded = true;
+					if (!res.headersSent) {
+						res.send('<html><body style="font-family:sans-serif;padding:24px;">Session connected successfully. Check your WhatsApp notifications.</body></html>');
+						markResponded();
+					}
 					return await removeFile(sessionDir);
-				} else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode != 401 && !responded) {
-					await delay(10000);
-					Elitechwiz_Md_QR_CODE();
+				} else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode != 401) {
+					if (!res.headersSent) {
+						res.status(503).send('<html><body style="font-family:sans-serif;padding:24px;">Connection closed before QR generation. Please retry.</body></html>');
+						markResponded();
+					}
+					await removeFile(sessionDir);
 				}
 			});
 		} catch (err) {
@@ -316,6 +345,7 @@ _Don't Forget To Give Star To My Repo! ⭐_
 				await res.json({
 					code: "Service is Currently Unavailable"
 				});
+				markResponded();
 			}
 			console.log(err);
 			await removeFile(sessionDir);

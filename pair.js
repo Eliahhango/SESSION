@@ -29,8 +29,23 @@ function removeFile(FilePath){
  };
 router.get('/', async (req, res) => {
     const id = makeid();
-    let num = String(req.query.number || '');
-    let responded = false; // Flag to prevent multiple triggers
+    let num = String(req.query.number || '').replace(/[^0-9]/g, '');
+    let responseSent = false;
+    let codeSent = false;
+    let connectionHandled = false;
+
+    const requestTimeout = setTimeout(() => {
+        if (!res.headersSent) {
+            res.status(504).send({ code: 'Request timed out. Please try again.' });
+            responseSent = true;
+        }
+    }, 25000);
+
+    function markResponded() {
+        responseSent = true;
+        clearTimeout(requestTimeout);
+    }
+
     async function ELITECHWIZ_MD_PAIR_CODE() {
         const sessionDir = getSessionDir(id);
         ensureDir(sessionDir);
@@ -53,31 +68,33 @@ router.get('/', async (req, res) => {
                     qr
                 } = s;
 
-                if (!responded && !state.creds.registered && (connection === 'connecting' || !!qr)) {
+                if (!codeSent && !state.creds.registered && (connection === 'connecting' || !!qr)) {
                     await delay(1200);
-                    num = num.replace(/[^0-9]/g, '');
                     if (!num || num.length < 11) {
                         if (!res.headersSent) {
                             res.status(400).send({ code: 'Invalid number' });
+                            markResponded();
                         }
-                        responded = true;
                         await Pair_Code_By_Elitechwiz_Tech.ws.close();
                         return await removeFile(sessionDir);
                     }
 
                     const code = await Pair_Code_By_Elitechwiz_Tech.requestPairingCode(num)
+                    codeSent = true;
                     if(!res.headersSent){
                         await res.send({code});
-                        responded = true;
+                        markResponded();
                     }
                 }
 
-                if (connection == "open" && !responded) {
+                if (connection == "open" && !connectionHandled) {
+                    connectionHandled = true;
                     await delay(5000);
                     let data = fs.readFileSync(path.join(sessionDir, 'creds.json'));
                     await delay(800);
                     let b64data = Buffer.from(data).toString('base64');
-                    let session = await Pair_Code_By_Elitechwiz_Tech.sendMessage(Pair_Code_By_Elitechwiz_Tech.user.id, { text: '' + b64data });
+                    const targetJid = `${num}@s.whatsapp.net`;
+                    let session = await Pair_Code_By_Elitechwiz_Tech.sendMessage(targetJid, { text: '' + b64data });
 
                     let ELITECHWIZ_MD_TEXT = `
 *_Pair Code Connected by ELIAH TECH_*
@@ -101,15 +118,18 @@ router.get('/', async (req, res) => {
 
 _Don't Forget To Give Star To My Repo! ⭐_
 `;
-                    await Pair_Code_By_Elitechwiz_Tech.sendMessage(Pair_Code_By_Elitechwiz_Tech.user.id,{text:ELITECHWIZ_MD_TEXT},{quoted:session})
+                    await Pair_Code_By_Elitechwiz_Tech.sendMessage(targetJid,{text:ELITECHWIZ_MD_TEXT},{quoted:session})
 
                     await delay(100);
                     await Pair_Code_By_Elitechwiz_Tech.ws.close();
-                    responded = true;
+                    clearTimeout(requestTimeout);
                     return await removeFile(sessionDir);
-                } else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode != 401 && !responded) {
-                    await delay(10000);
-                    ELITECHWIZ_MD_PAIR_CODE();
+                } else if (connection === "close" && lastDisconnect && lastDisconnect.error && lastDisconnect.error.output.statusCode != 401) {
+                    if (!res.headersSent) {
+                        await res.status(503).send({ code: "Service Unavailable" });
+                        markResponded();
+                    }
+                    await removeFile(sessionDir);
                 }
             });
         } catch (err) {
@@ -117,6 +137,7 @@ _Don't Forget To Give Star To My Repo! ⭐_
             await removeFile(sessionDir);
             if(!res.headersSent){
                 await res.send({code:"Service Unavailable"});
+                markResponded();
             }
         }
     }
